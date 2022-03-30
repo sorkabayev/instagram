@@ -8,13 +8,12 @@ class StoreService{
 
 
   static Future<String?> uploadImage(File? image,String folder) async{
-   print(image.toString() + "aaaaaa");
-   print(folder);
+
     String imgName = "image_" + DateTime.now().toString();
     Reference firebaseStorageRef = _storage.child(folder).child(imgName);
     TaskSnapshot taskSnapshot = await firebaseStorageRef.putFile(image!);
-   final String imgUrl = await taskSnapshot.ref.getDownloadURL();
-   print(taskSnapshot);
+
+    final String imgUrl = await taskSnapshot.ref.getDownloadURL();
     return imgUrl;
   }
 }

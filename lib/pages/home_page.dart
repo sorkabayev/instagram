@@ -1,7 +1,9 @@
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:instagram/view/home_widget.dart';
 import '../models/post_model.dart';
+import '../models/user_model.dart';
 import '../services/data_service.dart';
 import '../view/appBar_widget.dart';
 
@@ -16,13 +18,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+
+
   bool isLoading = true;
   List<Post> items = [];
+  bool onPressed = false;
+  bool isLiking = false;
+  User? users;
 
   @override
   void initState() {
     super.initState();
     _apiLoadFeeds();
+    _apiLoadUser();
   }
 
   void _apiLoadFeeds() async {
@@ -39,6 +48,22 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       isLoading = false;
       items = posts;
+    });
+  }
+
+  void _apiLoadUser() async {
+    setState(() {
+      isLoading = true;
+    });
+    DataService.loadUser().then((items) {
+      _showUserInfo(items);
+    });
+  }
+
+  void _showUserInfo(User user) {
+    setState(() {
+      users = user;
+      isLoading = false;
     });
   }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:instagram/services/pref_service.dart';
+import 'package:instagram/services/utils.dart';
 import '../models/post_model.dart';
 import '../models/user_model.dart';
 
@@ -17,8 +18,17 @@ class DataService {
   // User
   static Future<void> storeUser(User user) async {
     user.uid = (await Prefs.load(StorageKeys.UID))!;
+
+    Map<String, String> params = await Utils.deviceParams();
+
+    user.device_id = params["device_id"]!;
+    user.device_type = params["device_type"]!;
+    user.device_token = params["device_token"]!;
+
+
     return instance.collection(folderUsers).doc(user.uid).set(user.toJson());
   }
+
 
   static Future<User> loadUser() async {
     String uid = (await Prefs.load(StorageKeys.UID))!;
@@ -199,12 +209,12 @@ class DataService {
 
   static Future removeFeed(Post post) async {
     String uid = (await Prefs.load(StorageKeys.UID))!;
-
     return await instance.collection(folderUsers).doc(uid).collection(folderFeeds).doc(post.id).delete();
   }
 
   static Future removePost(Post post) async {
+    String uid = (await Prefs.load(StorageKeys.UID))!;
     await removeFeed(post);
-    return await instance.collection(folderUsers).doc(post.uid).collection(folderPosts).doc(post.id).delete();
+    return await instance.collection(folderUsers).doc(uid).collection(folderPosts).doc(post.id).delete();
   }
 }

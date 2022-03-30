@@ -1,10 +1,12 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:instagram/models/post_model.dart';
 import 'package:instagram/pages/add_page.dart';
 import 'package:instagram/pages/profile_page.dart';
 import 'package:instagram/pages/like_page.dart';
 import 'package:instagram/pages/home_page.dart';
 import 'package:instagram/pages/search_page.dart';
+
+import '../services/utils.dart';
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
@@ -19,19 +21,29 @@ class _MainPageState extends State<MainPage> {
   int currentIndex = 0;
   int sellectedIndex = 0;
 
+  _initNotification() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      Utils.showLocalNotification(message, context);
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      Utils.showLocalNotification(message, context);
+    });
+  }
+
   bool isDark = false;
 
   PageController controller = PageController();
 
   @override
   void initState() {
-    // TODO: implement initState
     controller.addListener(() {
       setState(() {
        sellectedIndex = controller.page!.toInt();
       });
     });
+    _initNotification();
     super.initState();
+
   }
 
   @override

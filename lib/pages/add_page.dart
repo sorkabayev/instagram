@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:instagram/pages/home_page.dart';
 import 'package:instagram/pages/main_page.dart';
 import 'package:instagram/services/store_service.dart';
 import 'package:instagram/view/appBar_widget.dart';
@@ -64,10 +63,8 @@ class _AddPageState extends State<AddPage> {
   }
 
  void _apiStorePost(Post post) async {
-    print("a");
    Post posted = await DataService.storePost(post);
     // Post to feeds folder
-    print("b");
 
     await DataService.storeFeed(posted).then((value) => {
       _moveToFeed(),
@@ -92,46 +89,54 @@ class _AddPageState extends State<AddPage> {
           color: Colors.purple,
         ),
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            children: [
-              _image == null
-                  ? GestureDetector(
-                      onTap: () {
-                        _showPicker();
-                      },
-                      child: Container(
-                        color: Colors.grey.shade300,
-                        child: const Icon(
-                          Icons.add_photo_alternate_outlined,
-                          size: 40,
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                children: [
+                  _image == null
+                      ? GestureDetector(
+                          onTap: () {
+                            _showPicker();
+                          },
+                          child: Container(
+                            color: Colors.grey.shade300,
+                            child: const Icon(
+                              Icons.add_photo_alternate_outlined,
+                              size: 40,
+                            ),
+                            height: MediaQuery.of(context).size.width,
+                            width: double.infinity,
+                          ),
+                        )
+                      : SizedBox(
+                          height: MediaQuery.of(context).size.width,
+                          width: double.infinity,
+                          child: Image.file(
+                            File(_image!.path),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        height: MediaQuery.of(context).size.width,
-                        width: double.infinity,
-                      ),
-                    )
-                  : SizedBox(
-                      height: MediaQuery.of(context).size.width,
+                  Container(
+                      margin: const EdgeInsets.only(left: 10, right: 10),
+                      height: MediaQuery.of(context).size.width - 5,
                       width: double.infinity,
-                      child: Image.file(
-                        File(_image!.path),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-              Container(
-                  margin: const EdgeInsets.only(left: 10, right: 10),
-                  height: MediaQuery.of(context).size.width - 5,
-                  width: double.infinity,
-                  child: TextField(
-                    controller: captionControler,
-                    decoration: const InputDecoration(hintText: "Caption"),
-                  ))
-            ],
+                      child: TextField(
+                        controller: captionControler,
+                        decoration: const InputDecoration(hintText: "Caption"),
+                      ))
+                ],
+              ),
+            ),
           ),
-        ),
+          if (isLoading)
+            const Center(
+              child: CircularProgressIndicator(color: Colors.pinkAccent,),
+            )
+        ],
       ),
     );
   }

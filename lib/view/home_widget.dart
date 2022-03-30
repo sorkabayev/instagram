@@ -7,7 +7,9 @@ import '../models/post_model.dart';
 import '../services/data_service.dart';
 class HomeWidget extends StatefulWidget {
  final Post post;
-  const HomeWidget({required this.post, Key? key,}) : super(key: key);
+ final Function? function;
+ final Function? load;
+  const HomeWidget({required this.post,this.function, Key? key, this.load,}) : super(key: key);
 
   @override
   _HomeWidgetState createState() => _HomeWidgetState();
@@ -23,10 +25,12 @@ class _HomeWidgetState extends State<HomeWidget> {
       isLoading = true;
     });
     await DataService.likePost(post, true);
-    setState(() {
-      isLoading = false;
-      post.isLiked = true;
-    });
+    if(mounted) {
+      setState(() {
+        isLoading = false;
+        post.isLiked = true;
+      });
+    }
   }
 
   void _apiUnPostLike(Post post) async {
@@ -38,6 +42,9 @@ class _HomeWidgetState extends State<HomeWidget> {
       isLoading = false;
       post.isLiked = false;
     });
+    if(widget.function != null) {
+      widget.function!();
+    }
   }
 
   void updateLike() {
@@ -45,6 +52,26 @@ class _HomeWidgetState extends State<HomeWidget> {
       _apiUnPostLike(widget.post);
     } else {
       _apiPostLike(widget.post);
+    }
+  }
+
+  void deletePost(Post post) async {
+    bool result = await Utils.dialogCommon(context, "Instagram Clone", "Do yu want to remove this post?", false);
+
+    if(result) {
+      setState(() {
+        isLoading = true;
+      });
+
+      await DataService.removePost(post);
+
+      setState(() {
+        isLoading = false;
+      });
+
+      if(widget.load != null) {
+        widget.load!();
+      }
     }
   }
 
@@ -59,7 +86,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           ListTile(
             leading: CircleAvatar(
               radius: 20,
-              child:widget.post.imageUser != null ? CachedNetworkImage(
+              child: widget.post.imageUser != null ? CachedNetworkImage(
                 height: 40,
                 imageUrl: widget.post.imageUser!,
                 placeholder: (context, url) => const CircularProgressIndicator(),
@@ -68,7 +95,8 @@ class _HomeWidgetState extends State<HomeWidget> {
             ),
             title: Text(widget.post.fullName,style: const TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),),
             subtitle: Text(Utils.getMonthDayYear(widget.post.createdDate)),
-            trailing: IconButton(icon: const Icon(Icons.more_horiz,color: Colors.black,), onPressed: () {  },),
+            trailing: IconButton(icon: const Icon(Icons.more_horiz,color: Colors.black,), onPressed: () {
+            },),
           ),
           CachedNetworkImage(
             width: MediaQuery.of(context).size.width,
@@ -79,7 +107,7 @@ class _HomeWidgetState extends State<HomeWidget> {
           ),
           Row(
             children: [
-              IconButton(onPressed: (){}, icon: const Icon(Icons.favorite_border,color: Colors.black,)),
+              IconButton(onPressed: updateLike, icon: Icon(widget.post.isLiked ? Icons.favorite : Icons.favorite_border,color: widget.post.isLiked ?  Colors.red: Colors.black, size: 27.5,)),
               IconButton(onPressed: (){}, icon: const Icon(CupertinoIcons.chat_bubble,color: Colors.black,)),
               IconButton(onPressed: (){}, icon: const Icon(CupertinoIcons.paperplane,color: Colors.black,)),
             ],

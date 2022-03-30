@@ -47,6 +47,8 @@ dependencies:
   intl: ^0.17.0
   shared_preferences: ^2.0.13
   firebase_messaging: ^11.2.8
+  device_info_plus: ^3.2.2
+  flutter_local_notifications: ^9.4.0
 
 
 
